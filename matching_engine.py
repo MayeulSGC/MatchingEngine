@@ -148,7 +148,7 @@ class Direction :
     """One slice of the book regrouping all price levels for one direction of trade"""
     
     def __init__(self,side):
-        print('Direction Created',side)
+
         self.root = None #initial price level
         self.side = side 
         self.global_quantity = 0 #total quantity on that side
@@ -186,7 +186,7 @@ class Direction :
                     exploring.insert_in_queue(logged_order) #we found the level so we just add the order to it
                     return
             #there was no corresponding level so we create one and link it to the tree
-            if exploring.price < logged_order.price:
+            if  logged_order.price> exploring.price:
                 exploring.right = Level(logged_order)
                 exploring.right.parent = exploring
             else :
@@ -244,28 +244,35 @@ class Direction :
         Level
 
         """
+
         if order_type =='Buy':
             if(level is not None):
-                if level.right: #looking for minimum price in the leaf prices higher than current level
-                    return self.extreme_finder(minmax=0, starting_point=level)
+                if level.right is not None: #looking for minimum price in the leaf prices higher than current level
+  
+                    return self.extreme_finder(minmax=False, starting_point=level.right)
                 else: 
                     #going up the tree to find the closest value to our right 
                     #we check that we are not in the case where we are somewhere on left node
                     potential_target = level.parent
                     cur = level 
                     if ( potential_target is not None):
-                        while ((potential_target is not None) & (cur == potential_target.right)):
-                               potential_target = potential_target.parent
-                               cur = cur.parent
+                        while (potential_target is not None) :
+                            if(cur == potential_target.right):
+                                potential_target = potential_target.parent
+                                cur = cur.parent
+                            else :
+                                break
+                                
                         return potential_target
                     else:
                         return None
             else :
+
                 return None
         else : 
             if(level is not None):
                 if level.left: #looking for max price in the leaf prices lower than current level
-                    return self.extreme_finder(minmax=1, starting_point=level)
+                    return self.extreme_finder(minmax=True, starting_point=level.left)
                 else :
                     #going up the tree to find the closest value to our left 
                     #we check that we are not in the case where we are somewhere on right node
@@ -493,27 +500,30 @@ class FullBook:
             best_level = self.ask.extreme_finder(0) #finding the minimum price on the ask side
             mkt_orders = self.bid.mkt_available # checking that there is no mkt orders with high time priority (eventhough there shouldn't be)
             # as the limit order would be filled on the spot if a mkt is standing
-            direction = self.bid
+            direction = self.ask
         else :
             best_level = self.bid.extreme_finder(1) #max price on bid side 
             mkt_orders = self.ask.mkt_available
-            direction = self.ask
+            direction = self.bid
 
         if(mkt_orders is None):
             if (best_level is not None):
                 #keep running while order is not fill completely and there is liquidity 
                 while ((order.remaining > 0) & (best_level is not None)):
                     self.trade(order,best_level)
+
+                    
                     if(best_level.top is None) & (direction.next_price(best_level,order.side) is not None):
                         #switching level 
                         best_level = direction.next_price(best_level,order.side)
+
                 #we went through the whole liquidity of the other side 
                 if(order.remaining>0):
 
                     self.log_mkt_order(order)
             else : 
                 #no counterparty so we log
-
+                print("no counterparty")
                 self.log_mkt_order(order)
         else: 
              #no time priority so we log (meaning no counterparty too as liquidity should be dried up here)
@@ -732,5 +742,5 @@ class MatchingEngine:
         #adopting array format as we want to swipe our data only once, and not slice it through multiple angles 
         df.apply(lambda x:self.clean_and_ack(x), axis = 1)
         
-        
-        
+engine = MatchingEngine()      
+engine.load("C://users//Saint Georges//notebooks//python//InputBB.csv")
