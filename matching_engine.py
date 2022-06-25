@@ -35,7 +35,7 @@ class Order :
         None.
 
         """
-        print('creating order',order_id)
+
         self.id = order_id
         self.ticker = ticker
         self.size = order_size  # Variable to track traded size (of matched orders)
@@ -54,7 +54,7 @@ class Level:
     We use double linked list and a binary search tree to process and match orders 
     """
     def __init__(self, order: Order):
-        print('level created',order.price)
+
         if(order.price =='MKT'):
             self.type = 'MKT'
         else:
@@ -83,7 +83,7 @@ class Level:
         None.
 
         """
-        print("adding order to queue")
+
         #updating queue
         if self.top is None:
             self.top  = new_order
@@ -93,7 +93,7 @@ class Level:
         self.bottom = new_order #adding at bottom of queue
         #updating global quantity
         self.total_quantity += new_order.remaining
-        print("order added",self.top.id,self.bottom.id)
+
         
     def scalp_from_queue(self):
         """
@@ -128,7 +128,7 @@ class Level:
         None.
 
         """
-        print('inserting order')
+
         if inserted_order.id>=self.bottom.id:
             self.add_to_queue(inserted_order)
         else : 
@@ -167,7 +167,7 @@ class Direction :
         None.
 
         """
-        print("log order at level")
+
         if self.root is not None:
             #searching the levels in a binary search fashion 
             exploring = self.root
@@ -292,7 +292,7 @@ class Direction :
         None.
 
         """
-        print("load mkt")
+
         if(self.mkt_available is not None):
             self.mkt_available.insert_in_queue(order)
         else: 
@@ -306,7 +306,7 @@ class FullBook:
 
     
     def __init__(self, ticker):
-        print('creating book')
+
         self.ticker = ticker
         self.bid = Direction(1)
         self.ask = Direction(0)
@@ -325,7 +325,7 @@ class FullBook:
 
         """
         #check if the order is limit as all mkt orders are priced None
-        print('running order')
+
         if (order_to_add.price):
             self.run_limit_order(order_to_add)
         else:
@@ -344,7 +344,7 @@ class FullBook:
         None.
 
         """
-        print('running limit order')
+
         if limit_order.side == 'Buy':
 
             best_level = self.ask.extreme_finder(False) #finding the minimum price on the ask side
@@ -404,7 +404,7 @@ class FullBook:
         None.
 
         """
-        print("spending liquidity, size =",mkt_queue.total_quantity, mkt_orders.total_quantity)
+
         while ((mkt_queue.top is not None) & (mkt_orders.top is not None)):
             if(mkt_orders.top.remaining>=mkt_queue.top.remaining):
                 mkt_orders.top.remaining -= mkt_queue.top.remaining
@@ -451,7 +451,7 @@ class FullBook:
             DESCRIPTION.
 
         """
-        print("trade",client_order.id, level_order.top.id)
+
         if client_order.remaining<= level_order.top.remaining:
             level_order.top.remaining -= client_order.remaining
             level_order.total_quantity -= client_order.remaining
@@ -488,7 +488,7 @@ class FullBook:
         None.
 
         """
-        print('run mkt order')
+
         if order.side == 'Buy':
             best_level = self.ask.extreme_finder(0) #finding the minimum price on the ask side
             mkt_orders = self.bid.mkt_available # checking that there is no mkt orders with high time priority (eventhough there shouldn't be)
@@ -509,15 +509,15 @@ class FullBook:
                         best_level = direction.next_price(best_level,order.side)
                 #we went through the whole liquidity of the other side 
                 if(order.remaining>0):
-                    print("partial fill")
+
                     self.log_mkt_order(order)
             else : 
                 #no counterparty so we log
-                print("no counterparty")
+
                 self.log_mkt_order(order)
         else: 
              #no time priority so we log (meaning no counterparty too as liquidity should be dried up here)
-             print("other mkt orders in queue")
+
              self.log_mkt_order(order)
              
     def log_mkt_order(self, mkt_order:Order):
@@ -534,7 +534,7 @@ class FullBook:
         None.
 
         """
-        print("log mkt order")
+
         if mkt_order.side=="Buy":
             self.bid.load_Mkt(mkt_order)
         else:
@@ -553,7 +553,7 @@ class FullBook:
         None.
 
         """
-        print("log limit order")
+
         if limit_order.side=='Buy': 
             self.bid.log_order(limit_order)
         else :
@@ -727,7 +727,7 @@ class MatchingEngine:
         """
         df = pd.read_csv(file_path,sep=';')
         print(df.shape)
-        print(df.isna().sum())
+
         #df = df.values
         #adopting array format as we want to swipe our data only once, and not slice it through multiple angles 
         df.apply(lambda x:self.clean_and_ack(x), axis = 1)
