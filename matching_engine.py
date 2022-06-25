@@ -591,7 +591,7 @@ class FullBook:
         else :
             print('Fill',client_order.id, client_order.ticker, 'MKT',client_order.side, client_order.size, price, qty)
             row=['Fill',client_order.id, client_order.ticker, 'MKT',client_order.side, client_order.size, price, qty]
-        with open('Logs.csv', 'a') as f:
+        with open('Matching_Logs.csv', 'a') as f:
             writer = csv.writer(f)
             writer.writerow(row) 
             f.close()
@@ -604,7 +604,7 @@ class MatchingEngine:
     def __init__(self):
         self.books ={}
         fieldnames = ["ActionType","OrderId","Symbol","Price","Side","OrderQuantity","FillPrice","FillQuantity"]
-        with open('Logs.csv', 'w') as f:
+        with open('Matching_Logs.csv', 'w') as f:
             writer = csv.writer(f)
             writer.writerow(fieldnames)
             f.close()
@@ -626,7 +626,7 @@ class MatchingEngine:
 
         """
         
-        with open('Logs.csv', 'a') as f:
+        with open('Matching_Logs.csv', 'a') as f:
             writer = csv.writer(f)
             if reject:
                 print('Reject',row[0],row[1],row[2],row[3],row[4])
