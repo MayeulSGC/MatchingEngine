@@ -367,7 +367,7 @@ class FullBook:
             if(mkt_queue is not None):
                 self.spend_liquidity(mkt_orders,mkt_queue,limit_order.price)
             #trading market liquidity first 
-            print(mkt_orders.top)
+
             while ((limit_order.remaining>0)& (mkt_orders.top is not None)):
                 self.trade(limit_order,mkt_orders)
 
@@ -523,7 +523,7 @@ class FullBook:
                     self.log_mkt_order(order)
             else : 
                 #no counterparty so we log
-                print("no counterparty")
+
                 self.log_mkt_order(order)
         else: 
              #no time priority so we log (meaning no counterparty too as liquidity should be dried up here)
@@ -742,5 +742,3 @@ class MatchingEngine:
         #adopting array format as we want to swipe our data only once, and not slice it through multiple angles 
         df.apply(lambda x:self.clean_and_ack(x), axis = 1)
         
-engine = MatchingEngine()      
-engine.load("C://users//Saint Georges//notebooks//python//InputBB.csv")
