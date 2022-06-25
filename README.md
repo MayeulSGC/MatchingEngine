@@ -38,4 +38,4 @@ The improvements to be considered next:
 - adding more type of orders (stop, stop_limit, etc)
 - develop the matching engine to use multithreading 
 - add cancel, expiration options on orders
-- add different matching algorithms 
+- add different matching algorithms (currently FIFO only)
