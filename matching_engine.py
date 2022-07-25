@@ -83,7 +83,8 @@ class Level:
         None.
 
         """
-
+        if not isinstance(new_order,Order):
+            raise Exception("new_order is not an Order object")
         #updating queue
         if self.top is None:
             self.top  = new_order
@@ -115,7 +116,7 @@ class Level:
 
         return taken_order
     
-    def insert_in_queue(self,inserted_order):
+    def insert_in_queue(self,inserted_order: Order):
         """
         Insert in queue in accordance with time priority of given order
 
@@ -128,6 +129,8 @@ class Level:
         None.
 
         """
+        if not isinstance(inserted_order,Order):
+            raise Exception("inserted_order is not an Order object")
 
         if inserted_order.id>=self.bottom.id:
             self.add_to_queue(inserted_order)
@@ -154,7 +157,7 @@ class Direction :
         self.global_quantity = 0 #total quantity on that side
         self.mkt_available: Level = None
         
-    def log_order(self,logged_order):
+    def log_order(self,logged_order: Order):
         """
         Enters an order in the side of the book at a level if level exist, creates it otherwise.
 
@@ -167,7 +170,9 @@ class Direction :
         None.
 
         """
-
+        if not isinstance(logged_order,Order):
+            raise Exception("logged_order is not an Order object")
+            
         if self.root is not None:
             #searching the levels in a binary search fashion 
             exploring = self.root
@@ -247,6 +252,8 @@ class Direction :
 
         if order_type =='Buy':
             if(level is not None):
+                if not isinstance(level, Level):
+                    raise Exception("level not Level instance")
                 if level.right is not None: #looking for minimum price in the leaf prices higher than current level
   
                     return self.extreme_finder(minmax=False, starting_point=level.right)
@@ -271,6 +278,8 @@ class Direction :
                 return None
         else : 
             if(level is not None):
+                if not isinstance(level, Level):
+                    raise Exception("level input not Level instance")
                 if level.left: #looking for max price in the leaf prices lower than current level
                     return self.extreme_finder(minmax=True, starting_point=level.left)
                 else :
@@ -286,7 +295,7 @@ class Direction :
                     else:
                         return None
 
-    def load_Mkt(self,order):
+    def load_Mkt(self,order: Order):
         """
         Add mkt order to market queue if existing, creates it otherwise
 
@@ -299,7 +308,8 @@ class Direction :
         None.
 
         """
-
+        if not isinstance(order,Order):
+            raise Exception("order input not Order instance")
         if(self.mkt_available is not None):
             self.mkt_available.insert_in_queue(order)
         else: 
@@ -318,7 +328,7 @@ class FullBook:
         self.bid = Direction(1)
         self.ask = Direction(0)
     
-    def add_order_to_book(self, order_to_add):
+    def add_order_to_book(self, order_to_add: Order):
         """
         Head function to add order to book 
 
@@ -332,13 +342,14 @@ class FullBook:
 
         """
         #check if the order is limit as all mkt orders are priced None
-
+        if not isinstance(order_to_add, Order):
+            raise Exception("order input not Order instance")
         if (order_to_add.price):
             self.run_limit_order(order_to_add)
         else:
             self.run_mkt_order(order_to_add)
 
-    def run_limit_order(self, limit_order):
+    def run_limit_order(self, limit_order: Order):
         """
         Will run the trade if liquidity is found (ask higher than order price or bid lower than order price)
         We will maintain the price priority when buy orders for example are posted higher than 2 current limit
@@ -351,7 +362,8 @@ class FullBook:
         None.
 
         """
-
+        if not isinstance(limit_order, Order):
+            raise Exception("limit_order input not an Order instance")
         if limit_order.side == 'Buy':
 
             best_level = self.ask.extreme_finder(False) #finding the minimum price on the ask side
@@ -411,7 +423,12 @@ class FullBook:
         None.
 
         """
-
+        if mkt_queue is not None:
+            if not isinstance(mkt_queue,Level):
+                raise Exception("mkt_queue is not Level instance")
+        if mkt_orders is not None:
+            if not isinstance(mkt_orders, Level):
+                raise Exception("mkt_orders is not Level instance")
         while ((mkt_queue.top is not None) & (mkt_orders.top is not None)):
             if(mkt_orders.top.remaining>=mkt_queue.top.remaining):
                 mkt_orders.top.remaining -= mkt_queue.top.remaining
@@ -458,7 +475,11 @@ class FullBook:
             DESCRIPTION.
 
         """
-
+        if not isinstance(client_order,Order):
+            raise Exception("client_order is not Order instance")
+        if not isinstance(level_order, Level):
+            raise Exception('level_order is not Level instance')
+            
         if client_order.remaining<= level_order.top.remaining:
             level_order.top.remaining -= client_order.remaining
             level_order.total_quantity -= client_order.remaining
@@ -495,6 +516,8 @@ class FullBook:
         None.
 
         """
+        if not isinstance(order,Order):
+            raise Exception("order is not Order instance")
 
         if order.side == 'Buy':
             best_level = self.ask.extreme_finder(0) #finding the minimum price on the ask side
@@ -544,6 +567,8 @@ class FullBook:
         None.
 
         """
+        if not isinstance(mkt_order, Order):
+            raise Exception("mkt_order not Order instance")
 
         if mkt_order.side=="Buy":
             self.bid.load_Mkt(mkt_order)
@@ -563,7 +588,8 @@ class FullBook:
         None.
 
         """
-
+        if not isinstance(limit_order, Order):
+            raise Exception("limit_order not Order instance")
         if limit_order.side=='Buy': 
             self.bid.log_order(limit_order)
         else :
@@ -584,6 +610,19 @@ class FullBook:
         None.
 
         """
+        if not isinstance(client_order, Order):
+            raise Exception('client_order is not Order instance')
+        if not isinstance(book_side, Order):
+            raise Exception("book_side is not Order instance")
+        try: 
+            price/2 
+        except :
+            raise Exception("Price must be numerical")
+        try : 
+            qty = int(qty)
+        except:
+            raise Exception("qty must be an int. Float will be truncated to lower int")
+        
         if(book_side.price is not None):
             print('Fill',book_side.id, book_side.ticker,book_side.price, book_side.side, book_side.size, price, qty)
             row =['Fill',book_side.id, book_side.ticker,book_side.price, book_side.side, book_side.size, price, qty]
@@ -702,6 +741,8 @@ class MatchingEngine:
         None.
 
         """
+        if not isinstance(row,pd.Series):
+            raise Exception("row input needs to be a pandas series")
         rej = False
         if(row['Price']=='MKT'):
             if((row.isna().any())|(row['OrderQuantity']>1000000)):
