@@ -215,7 +215,9 @@ class Direction:
 
         self.global_quantity += logged_order.size  # adding quantity
 
-    def extreme_finder(self, minmax: bool = True, starting_point: Level = None)-> Level:
+    def extreme_finder(
+        self, minmax: bool = True, starting_point: Level = None
+    ) -> Level:
         """
         Function to return min or max of tree from strating point or root
         False : min
@@ -250,7 +252,7 @@ class Direction:
         else:
             return None
 
-    def next_price(self, level:Level, order_type:str) -> Level:
+    def next_price(self, level: Level, order_type: str) -> Level:
         """
         Find the next best price and return corresponding level
         Next price is the lowest price higher than current if we bought the liquidity away and the highest of lowest if we sold it
@@ -792,14 +794,14 @@ class MatchingEngine:
             "OrderQuantity",
             "FillPrice",
             "FillQuantity",
-            "Reason"
+            "Reason",
         ]
         with open("Matching_Logs.csv", "w") as f:
             writer = csv.writer(f)
             writer.writerow(fieldnames)
             f.close()
 
-    def output(self, row:pd.Series, reject:bool=False, reason:str=None):
+    def output(self, row: pd.Series, reject: bool = False, reason: str = None):
         """
         Print and log the designated message in the current working directory
 
@@ -820,9 +822,21 @@ class MatchingEngine:
             writer = csv.writer(f)
             if reject:
                 print("Reject", row[0], row[1], row[2], row[3], row[4])
-                print("Reason: "+reason)
-                writer.writerow(["Reject", row[0], row[1], row[2], row[3], row[4], None,None , reason])
-           
+                print("Reason: " + reason)
+                writer.writerow(
+                    [
+                        "Reject",
+                        row[0],
+                        row[1],
+                        row[2],
+                        row[3],
+                        row[4],
+                        None,
+                        None,
+                        reason,
+                    ]
+                )
+
             else:
                 print("Ack", row[0], row[1], row[2], row[3], row[4])
                 writer.writerow(["Ack", row[0], row[1], row[2], row[3], row[4]])
@@ -866,20 +880,20 @@ class MatchingEngine:
         # Creating order
         if row["Price"] == "MKT":
             order = Order(
-                order_id = row["OrderID"], 
-                ticker = row["Symbol"], 
-                order_size = row["OrderQuantity"], 
-                side = row["Side"], 
-                order_type = "MKT"
+                order_id=row["OrderID"],
+                ticker=row["Symbol"],
+                order_size=row["OrderQuantity"],
+                side=row["Side"],
+                order_type="MKT",
             )
         else:
             order = Order(
-                order_id = row["OrderID"],
-                ticker = row["Symbol"],
-                order_size = row["OrderQuantity"],
-                side = row["Side"],
-                order_type = "LIMIT",
-                price = row["Price"],
+                order_id=row["OrderID"],
+                ticker=row["Symbol"],
+                order_size=row["OrderQuantity"],
+                side=row["Side"],
+                order_type="LIMIT",
+                price=row["Price"],
             )
         # adding order to book
         self.books[row["Symbol"]].add_order_to_book(order)
@@ -899,56 +913,75 @@ class MatchingEngine:
         """
         if not isinstance(row, pd.Series):
             raise Exception("row input needs to be a pandas series")
-    
-        #CHECKUPS DATATYPE 
+
+        # CHECKUPS DATATYPE
         try:
-            row['OrderQuantity']=int(row['OrderQuantity'])
+            row["OrderQuantity"] = int(row["OrderQuantity"])
         except:
-            
-            self.output(row = row, reject = True, reason="Rejecting Order: OrderQuantity must be numeric")
+            self.output(
+                row=row,
+                reject=True,
+                reason="Rejecting Order: OrderQuantity must be numeric",
+            )
             return None
         try:
-            row['Symbol'] = str(row['Symbol'])
+            row["Symbol"] = str(row["Symbol"])
         except:
-            self.output(row = row,reject = True, reason = 'Issue with symbol, please use string')
+            self.output(
+                row=row, reject=True, reason="Issue with symbol, please use string"
+            )
             return None
         try:
-            row['OrderID'] = int(row['OrderID'])
+            row["OrderID"] = int(row["OrderID"])
         except:
-            self.output(row = row,reject = True,reason = "Can't convert ID to numeric value. Please use numeric vaues as engine use id to assess time priority")
+            self.output(
+                row=row,
+                reject=True,
+                reason="Can't convert ID to numeric value. Please use numeric vaues as engine use id to assess time priority",
+            )
             return None
 
         if row["Price"] is not None:
-            try :
+            try:
                 row["Price"] = round(float(row["Price"]), 1)
-                if(row["Price"]<0):
-                    self.output(row=row,reject=True,reason = "Price can't be negative")
+                if row["Price"] < 0:
+                    self.output(row=row, reject=True, reason="Price can't be negative")
                     return None
-            except: 
-                if row['Price']!='MKT':
-                    self.output(row=row,reject=True,reason="Only accepted non numeric price value is 'MKT' for market orders")
+            except:
+                if row["Price"] != "MKT":
+                    self.output(
+                        row=row,
+                        reject=True,
+                        reason="Only accepted non numeric price value is 'MKT' for market orders",
+                    )
                     return None
             if row.isna().any():
-                self.output(row=row,reject=True,reason='Some order input are empty')
+                self.output(row=row, reject=True, reason="Some order input are empty")
                 return None
-        else: 
-            self.output(row=row, reject=True,reason = "Price can't be empty, set to 'MKT' for market orders")
+        else:
+            self.output(
+                row=row,
+                reject=True,
+                reason="Price can't be empty, set to 'MKT' for market orders",
+            )
             return None
 
-        if row["OrderQuantity"]>1000000:
-            self.output(row=row,reject=True,reason="Maximum order size is 1000000")
+        if row["OrderQuantity"] > 1000000:
+            self.output(row=row, reject=True, reason="Maximum order size is 1000000")
             return None
-        elif row["OrderQuantity"]<=0:
-            self.output(row=row,reject=True,reason="OrderQuantity need to be strickly positive")
+        elif row["OrderQuantity"] <= 0:
+            self.output(
+                row=row,
+                reject=True,
+                reason="OrderQuantity need to be strickly positive",
+            )
             return None
 
-
-        
-        self.output(row= row, reject = False)
+        self.output(row=row, reject=False)
         self.dispatcher(row)
         return None
 
-    def load(self, file_path:str=None,df:pd.DataFrame=None):
+    def load(self, file_path: str = None, df: pd.DataFrame = None):
         """
         Loading csv as pandas df for easier cleaning
         for simplicity we assume that we can sort OrderId alphabetically to get time priority
@@ -966,7 +999,7 @@ class MatchingEngine:
             raise Exception("No data or path provided")
         elif df is None:
             df = pd.read_csv(file_path, sep=";")
-        else: 
+        else:
             print(df.head())
 
         # adopting array format as we want to swipe our data only once, and not slice it through multiple angles
